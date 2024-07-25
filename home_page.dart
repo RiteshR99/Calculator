@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:expressions/expressions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,8 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       if (value == '=') {
         _calculateResult();
+      } else if (['sin', 'cos', 'tan', 'log'].contains(value)) {
+        _input += '$value(';
       } else {
         _input += value;
       }
@@ -25,19 +28,67 @@ class _HomePageState extends State<HomePage> {
 
   void _calculateResult() {
     try {
-      final expression = _input.replaceAll('x', '*').replaceAll('÷', '/');
+      String balancedInput = _balanceBrackets(_input);
+      String processedInput = _preProcessFunctions(balancedInput);
+      final expression = processedInput
+          .replaceAll('x', '*')
+          .replaceAll('÷', '/');
+
       final exp = Expression.parse(expression);
       final evaluator = const ExpressionEvaluator();
       final result = evaluator.eval(exp, {});
       setState(() {
-        _result = result.toString();
-        _history.add('$_input = $_result');
+        _result = result.toStringAsFixed(6);
+        _history.add('$balancedInput = $_result');
       });
     } catch (e) {
       setState(() {
-        _result = 'Error';
+        _result = 'Error: ${e.toString()}';
       });
     }
+  }
+
+  String _balanceBrackets(String input) {
+    int openBrackets = input.split('(').length - 1;
+    int closeBrackets = input.split(')').length - 1;
+    String balanced = input;
+    for (int i = 0; i < openBrackets - closeBrackets; i++) {
+      balanced += ')';
+    }
+    return balanced;
+  }
+
+  String _preProcessFunctions(String input) {
+    RegExp regExp = RegExp(r'(sin|cos|tan|log|factorial)\(([^)]+)\)');
+    return input.replaceAllMapped(regExp, (match) {
+      String func = match.group(1)!;
+      String arg = match.group(2)!;
+      double value = double.parse(arg);
+      switch (func) {
+        case 'sin':
+          return math.sin(_degreesToRadians(value)).toString();
+        case 'cos':
+          return math.cos(_degreesToRadians(value)).toString();
+        case 'tan':
+          return math.tan(_degreesToRadians(value)).toString();
+        case 'log':
+          return (math.log(value) / math.ln10).toString();
+        case 'factorial':
+          return _factorial(value.toInt()).toString();
+        default:
+          return match.group(0)!;
+      }
+    });
+  }
+
+  double _degreesToRadians(num degrees) {
+    return degrees * (math.pi / 180);
+  }
+
+  int _factorial(int n) {
+    if (n < 0) throw Exception('Invalid input for factorial');
+    if (n == 0 || n == 1) return 1;
+    return List.generate(n, (i) => i + 1).reduce((a, b) => a * b);
   }
 
   void _clearInput() {
@@ -202,6 +253,23 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
                   ),
+                  SizedBox(width: 4.0),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildButton('sin', () => _onButtonPressed('sin')),
+                        SizedBox(height: 4.0),
+                        _buildButton('cos', () => _onButtonPressed('cos')),
+                        SizedBox(height: 4.0),
+                        _buildButton('tan', () => _onButtonPressed('tan')),
+                        SizedBox(height: 4.0),
+                        _buildButton('log', () => _onButtonPressed('log')),
+                        SizedBox(height: 4.0),
+                        _buildButton('!', () => _onButtonPressed('!')),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -216,7 +284,7 @@ class _HomePageState extends State<HomePage> {
       child: Container(
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.white54,
+          color: Colors.white24,
         ),
         child: InkWell(
           onTap: onTap as void Function()?,
@@ -250,10 +318,4 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-}
-
-void main() {
-  runApp(MaterialApp(
-    home: HomePage(),
-  ));
 }
