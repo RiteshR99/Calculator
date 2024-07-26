@@ -22,6 +22,10 @@ class _HomePageState extends State<HomePage> {
         _calculateResult();
       } else if (['sin', 'cos', 'tan', 'log'].contains(value)) {
         _input += '$value(';
+      } else if (value == '!') {
+        if (_input.isNotEmpty && RegExp(r'\d$').hasMatch(_input)) {
+          _input += '!';
+        }
       } else {
         _input += value;
       }
@@ -61,7 +65,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   String _preProcessFunctions(String input) {
-    RegExp regExp = RegExp(r'(sin|cos|tan|log|factorial)\(([^)]+)\)');
+    input = _handleFactorial(input);
+    RegExp regExp = RegExp(r'(sin|cos|tan|log)\(([^)]+)\)');
     return input.replaceAllMapped(regExp, (match) {
       String func = match.group(1)!;
       String arg = match.group(2)!;
@@ -75,11 +80,17 @@ class _HomePageState extends State<HomePage> {
           return math.tan(_degreesToRadians(value)).toString();
         case 'log':
           return (math.log(value) / math.ln10).toString();
-        case 'factorial':
-          return _factorial(value.toInt()).toString();
         default:
           return match.group(0)!;
       }
+    });
+  }
+
+  String _handleFactorial(String input) {
+    RegExp factorialRegExp = RegExp(r'(\d+)!');
+    return input.replaceAllMapped(factorialRegExp, (match) {
+      int n = int.parse(match.group(1)!);
+      return _factorial(n).toString();
     });
   }
 
