@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'history.dart';
 import 'dark_theme.dart';
 import 'light_theme.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -12,6 +13,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   String _input = '';
   String _result = '';
   List<String> _history = [];
@@ -32,6 +34,42 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  @override
+  void initState() {
+    super.initState();
+    _loadHistory();
+  }
+
+  Future<void> _loadHistory() async {
+    try {
+      QuerySnapshot snapshot = await _firestore
+          .collection('calculations')
+          .orderBy('timestamp', descending: true)
+          .limit(50)
+          .get();
+
+      setState(() {
+        _history = snapshot.docs
+            .map((doc) => '${doc['expression']} = ${doc['result']}')
+            .toList();
+      });
+    } catch (e) {
+      print('Error loading history: $e');
+    }
+  }
+
+  Future<void> _saveCalculation(String expression, String result) async {
+    try {
+      await _firestore.collection('calculations').add({
+        'expression': expression,
+        'result': result,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print('Error saving calculation: $e');
+    }
+  }
+
   void _calculateResult() {
     try {
       String balancedInput = _balanceBrackets(_input);
@@ -45,7 +83,8 @@ class _HomePageState extends State<HomePage> {
       final result = evaluator.eval(exp, {});
       setState(() {
         _result = result.toStringAsFixed(6);
-        _history.add('$balancedInput = $_result');
+        _history.insert(0, '$balancedInput = $_result');
+        _saveCalculation(balancedInput, _result);
       });
     } catch (e) {
       setState(() {
@@ -114,7 +153,7 @@ class _HomePageState extends State<HomePage> {
   void _navigateToHistory(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => HistoryPage(history: _history),
+        builder: (context) => HistoryPage(),
       ),
     );
   }
