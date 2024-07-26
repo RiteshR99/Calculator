@@ -109,7 +109,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -155,7 +155,7 @@ class _HomePageState extends State<HomePage> {
                   controller: TextEditingController(text: _input),
                   decoration: InputDecoration(
                     hintText: 'enter expression',
-                    hintStyle: TextStyle(color: Colors.black45),
+                    hintStyle: TextStyle(color: Colors.black),
                     filled: true,
                     fillColor: Colors.transparent,
                   ),
@@ -284,7 +284,7 @@ class _HomePageState extends State<HomePage> {
       child: Container(
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.white24,
+          color: Theme.of(context).colorScheme.secondary,
         ),
         child: InkWell(
           onTap: onTap as void Function()?,
@@ -294,6 +294,7 @@ class _HomePageState extends State<HomePage> {
               style: TextStyle(
                 fontSize: 30.0,
                 fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary
               ),
             ),
           ),
@@ -312,7 +313,7 @@ class _HomePageState extends State<HomePage> {
         child: InkWell(
           onTap: onTap as void Function()?,
           child: Center(
-            child: Icon(icon, color: color == Colors.deepOrangeAccent ? Colors.white : Colors.black),
+            child: Icon(icon, color: color == Colors.deepOrangeAccent ? Theme.of(context).colorScheme.background : Theme.of(context).colorScheme.primary),
           ),
         ),
       ),
