@@ -1,3 +1,5 @@
+import 'package:calculator/dark_theme.dart';
+import 'package:calculator/light_theme.dart';
 import 'package:flutter/material.dart';
 import 'home_page.dart';
 
@@ -11,6 +13,8 @@ class calculator extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: lightTheme,
+      darkTheme: darkTheme,
       home: HomePage(),
     );
   }
