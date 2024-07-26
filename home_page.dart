@@ -3,6 +3,8 @@ import 'package:expressions/expressions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'history.dart';
+import 'dark_theme.dart';
+import 'light_theme.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -136,7 +138,7 @@ class _HomePageState extends State<HomePage> {
               onTap: () => _navigateToHistory(context),
               child: Icon(
                 Icons.history,
-                color: Colors.black87,
+                color: Theme.of(context).colorScheme.primary,
                 size: 35.0,
               ),
             ),
@@ -155,7 +157,7 @@ class _HomePageState extends State<HomePage> {
                   controller: TextEditingController(text: _input),
                   decoration: InputDecoration(
                     hintText: 'enter expression',
-                    hintStyle: TextStyle(color: Colors.black),
+                    hintStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
                     filled: true,
                     fillColor: Colors.transparent,
                   ),
@@ -170,7 +172,7 @@ class _HomePageState extends State<HomePage> {
                   _result,
                   style: TextStyle(
                     fontSize: 30.0,
-                    color: Colors.black,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
               ),
